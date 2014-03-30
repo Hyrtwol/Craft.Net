@@ -124,7 +124,10 @@ namespace Craft.Net.Client
                     nextPhysicsUpdate = DateTime.Now.AddMilliseconds(50);
                     try
                     {
-                        engine.Update();
+                        if (engine != null)
+                        {
+                            engine.Update();
+                        }
                     }
                     catch (Exception)
                     {
