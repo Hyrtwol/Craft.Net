@@ -206,9 +206,11 @@ namespace Craft.Net.Server.Handlers
         {
             //sbyte maxStack = (sbyte)Item.GetMaximumStackSize(new ItemDescriptor(heldItem.Id, heldItem.Metadata));
             sbyte maxStack = 64; // TODO
-            while (heldItem.Count < client.PaintedSlots.Count)
-                client.PaintedSlots.RemoveAt(client.PaintedSlots.Count - 1);
-            for (int i = 0; i < client.PaintedSlots.Count; i++)
+            var clientPaintedSlots = client.PaintedSlots;
+            if (clientPaintedSlots.Count < 1) return;
+            while (heldItem.Count < clientPaintedSlots.Count)
+                client.PaintedSlots.RemoveAt(clientPaintedSlots.Count - 1);
+            for (int i = 0; i < clientPaintedSlots.Count; i++)
             {
                 if (!client.Entity.Inventory[client.PaintedSlots[i]].CanMerge(heldItem))
                 {
@@ -216,12 +218,12 @@ namespace Craft.Net.Server.Handlers
                     i--;
                 }
             }
-            int itemsPerSlot = heldItem.Count / client.PaintedSlots.Count;
+            int itemsPerSlot = heldItem.Count / clientPaintedSlots.Count;
             if (onePerSlot)
                 itemsPerSlot = 1;
             var item = (ItemStack)heldItem.Clone();
             item.Count = (sbyte)itemsPerSlot;
-            foreach (var slot in client.PaintedSlots)
+            foreach (var slot in clientPaintedSlots)
             {
                 if (client.Entity.Inventory[slot].Empty)
                 {
