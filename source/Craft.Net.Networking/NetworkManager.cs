@@ -99,6 +99,7 @@ namespace Craft.Net.Networking
             serverbound.Add(typeof(ClientSettingsPacket));
             serverbound.Add(typeof(ClientStatusPacket));
             serverbound.Add(typeof(PluginMessagePacket));
+            serverbound.Add(typeof(DisconnectPacket));
 
             clientbound.Add(typeof(KeepAlivePacket)); // Clientbound
             clientbound.Add(typeof(JoinGamePacket));
@@ -235,7 +236,7 @@ namespace Craft.Net.Networking
                     }
                 }
                 if (id == -1)
-                    throw new InvalidOperationException("Attempted to write invalid packet type.");
+                    throw new InvalidOperationException("Attempted to write invalid packet type. " + type);
                 MinecraftStream.WriteVarInt((int)BufferedStream.PendingWrites + MinecraftStream.GetVarIntLength(id));
                 MinecraftStream.WriteVarInt(id);
                 BufferedStream.WriteImmediately = false;
