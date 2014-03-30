@@ -6,6 +6,7 @@ namespace Craft.Net.Anvil
     public class Section
     {
         public const byte Width = 16, Height = 16, Depth = 16;
+        const int size = Width * Height * Depth;
 
         public byte[] Blocks { get; set; }
         [TagName("Data")]
@@ -24,7 +25,6 @@ namespace Craft.Net.Anvil
 
         public Section(byte y)
         {
-            const int size = Width * Height * Depth;
             this.Y = y;
             Blocks = new byte[size];
             Metadata = new NibbleArray(size);
@@ -44,7 +44,7 @@ namespace Craft.Net.Anvil
 
         public short GetBlockId(Coordinates3D coordinates)
         {
-            int index = coordinates.X + (coordinates.Z * Width) + (coordinates.Y * Height * Width);
+            int index = coordinates.X + Width * (coordinates.Z + Height * coordinates.Y);
             short value = Blocks[index];
             if (Add != null)
                 value |= (short)(Add[index] << 8);
@@ -53,25 +53,25 @@ namespace Craft.Net.Anvil
 
         public byte GetMetadata(Coordinates3D coordinates)
         {
-            int index = coordinates.X + (coordinates.Z * Width) + (coordinates.Y * Height * Width);
+            int index = coordinates.X + Width * (coordinates.Z + Height * coordinates.Y);
             return Metadata[index];
         }
 
         public byte GetSkyLight(Coordinates3D coordinates)
         {
-            int index = coordinates.X + (coordinates.Z * Width) + (coordinates.Y * Height * Width);
+            int index = coordinates.X + Width * (coordinates.Z + Height * coordinates.Y);
             return SkyLight[index];
         }
 
         public byte GetBlockLight(Coordinates3D coordinates)
         {
-            int index = coordinates.X + (coordinates.Z * Width) + (coordinates.Y * Height * Width);
+            int index = coordinates.X + Width * (coordinates.Z + Height * coordinates.Y);
             return BlockLight[index];
         }
 
         public void SetBlockId(Coordinates3D coordinates, short value)
         {
-            int index = coordinates.X + (coordinates.Z * Width) + (coordinates.Y * Height * Width);
+            int index = coordinates.X + Width * (coordinates.Z + Height * coordinates.Y);
             if (value == 0)
             {
                 if (Blocks[index] != 0)
@@ -85,26 +85,26 @@ namespace Craft.Net.Anvil
             Blocks[index] = (byte)value;
             if ((value & ~0xFF) != 0)
             {
-                if (Add == null) Add = new NibbleArray(Width * Height * Depth);
+                if (Add == null) Add = new NibbleArray(size);
                 Add[index] = (byte)((ushort)value >> 8);
             }
         }
 
         public void SetMetadata(Coordinates3D coordinates, byte value)
         {
-            int index = coordinates.X + (coordinates.Z * Width) + (coordinates.Y * Height * Width);
+            int index = coordinates.X + Width * (coordinates.Z + Height * coordinates.Y);
             Metadata[index] = value;
         }
 
         public void SetSkyLight(Coordinates3D coordinates, byte value)
         {
-            int index = coordinates.X + (coordinates.Z * Width) + (coordinates.Y * Height * Width);
+            int index = coordinates.X + Width * (coordinates.Z + Height * coordinates.Y);
             SkyLight[index] = value;
         }
 
         public void SetBlockLight(Coordinates3D coordinates, byte value)
         {
-            int index = coordinates.X + (coordinates.Z * Width) + (coordinates.Y * Height * Width);
+            int index = coordinates.X + Width * (coordinates.Z + Height * coordinates.Y);
             BlockLight[index] = value;
         }
 
