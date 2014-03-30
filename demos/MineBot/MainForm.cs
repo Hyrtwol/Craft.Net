@@ -11,23 +11,36 @@ using Craft.Net;
 using Craft.Net.Client;
 using Craft.Net.Client.Events;
 using Craft.Net.Common;
+using MineBot.Bot;
 
 namespace MineBot
 {
     public partial class MainForm : Form
     {
-        delegate void SetTextCallback(string text);
+        delegate void SetTextCallback(object sender, string message);
 
-        private MinecraftClient _client;
+        //private MinecraftClient _client;
         private Vector3 _seek;
         private bool _seekDirty;
         private bool _doSeek;
+        private readonly MinerBotManager _botManager;
 
         public MainForm()
         {
             InitializeComponent();
+            
             Text = Application.ProductName + " " + Application.ProductVersion;
-            UpdateButtons();
+
+            _botManager = new MinerBotManager();
+            _botManager.LogMessage += LogIt;
+
+            UpdateUI();
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            //e.Cancel = (_client != null);
+            e.Cancel = _botManager.IsConnected;
         }
 
         private void buttonPing_Click(object sender, EventArgs e)
@@ -52,7 +65,7 @@ namespace MineBot
             sb.AppendFormat("Description: {0}", ping.Description);
             sb.AppendLine();
             sb.AppendFormat("Latency: {0}", ping.Latency.TotalMilliseconds);
-            Log(sb.ToString());
+            LogIt(this, sb.ToString());
         }
 
         private IPEndPoint GetEndPoint()
@@ -64,112 +77,51 @@ namespace MineBot
 
         private void buttonConnect_Click(object sender, EventArgs e)
         {
-            if (_client != null) return;
+            if (_botManager.IsConnected) return;
+
             var endPoint = GetEndPoint();
             if (endPoint == null) return;
-            var session = new Session(textBoxUserName.Text);
-            _client = new MinecraftClient(session);
-            _client.Connect(endPoint);
-            _client.ChatMessage += ChatMessage; // (s, ea) => Log(ea.RawMessage);
-            _client.Disconnected += ClientDisconnected;
-            //_client.
-            //_client.LoggedIn
-            UpdateButtons();
+            var name = string.Format(textBoxUserName.Text, _botManager.Count + 1);
+            _botManager.AddMiner(endPoint, name);
+            UpdateUI();
             _seekDirty = true;
             timer1.Enabled = true;
         }
 
         private void buttonDisconnect_Click(object sender, EventArgs e)
         {
-            if (_client == null) return;
+            if (!_botManager.IsConnected) return;
             timer1.Enabled = false;
-            _client.Disconnect("Done for today");
-            _client = null;
-            UpdateButtons();
+            _botManager.DisconnectAll("Done for today");
+            UpdateUI();
         }
 
-        private void UpdateButtons()
+        private void UpdateUI()
         {
-            var isConnected = _client != null;
+            var isConnected = _botManager.IsConnected;
             buttonConnect.Enabled = !isConnected;
             buttonDisconnect.Enabled = isConnected;
         }
-
-        private void ChatMessage(object sender, ChatMessageEventArgs e)
-        {
-            Log(e.RawMessage);
-        }
-
-        private void ClientDisconnected(object sender, DisconnectEventArgs e)
-        {
-            Log("Client disconnected " +e.Reason);
-        }
-
-        private void Log(string message)
+        
+        private void LogIt(object sender, string message)
         {
             // InvokeRequired required compares the thread ID of the 
             // calling thread to the thread ID of the creating thread. 
             // If these threads are different, it returns true. 
-            if (this.textBoxLog.InvokeRequired)
+            if (textBoxLog.InvokeRequired)
             {
-                var d = new SetTextCallback(Log);
-                this.Invoke(d, new object[] { message });
+                Invoke(new SetTextCallback(LogIt), new object[] { sender, message });
             }
             else
             {
-                this.textBoxLog.Text = message;
+                textBoxLog.Text = message;
             }
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (_client != null)
-            {
-                var position = _client.Position;
-                if (_seekDirty)
-                {
-                    _seek = position;
-                    numericUpDown1.Value = (decimal) _seek.X;
-                    numericUpDown2.Value = (decimal) _seek.Z;
-                    _seekDirty = false;
-                }
-
-                if (_doSeek)
-                {
-                    var dif = _seek - position;
-                    //var dist = _seek.DistanceTo(position);
-                    var dist = dif.Distance;
-                    if (dist > 0.5)
-                    {
-                        //_client.Move()
-                        var vel = dif;
-                        vel /= dist;
-                        _client.Velocity = vel;
-                    }
-                    else
-                    {
-                        _doSeek = false;
-                    }
-                }
-                label1.Text = string.Format(
-                    "Pos {0} {1} {2}",
-                    position.X, position.Y, position.Z);
-                label2.Text = string.Format(
-                    "Seek {0} {1} {2}",
-                    _seek.X, _seek.Y, _seek.Z);
-            }
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            if (_client != null)
-            {
-                Vector3 position = _client.Position;
-                position.X = (double) numericUpDown1.Value;
-                position.Z = (double) numericUpDown2.Value;
-                _seek = position;
-                _doSeek = true;
-            }
+            _botManager.Update();
+            label3.Text = "Count: " + _botManager.Count;
         }
     }
 }

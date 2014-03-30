@@ -44,6 +44,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bot\EnumStateMachine.cs" />
+    <Compile Include="Bot\Miner.cs" />
+    <Compile Include="Bot\MinerBotManager.cs" />
+    <Compile Include="Bot\MinerStates.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
