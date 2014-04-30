@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using Craft.Net.Common;
 using BufferedStream = Craft.Net.Networking.BufferedStream;
@@ -8,8 +9,8 @@ namespace Craft.Net.Networking
 {
     public class NetworkManager
     {
-        public const int ProtocolVersion = 4;
-        public const string FriendlyVersion = "1.7.5";
+        public const int ProtocolVersion = 5; //4;
+        public const string FriendlyVersion = "1.7.9"; //"1.7.5";
 
         public NetworkMode NetworkMode { get; private set; }
         public bool Strict { get; set; }
@@ -236,7 +237,10 @@ namespace Craft.Net.Networking
                     }
                 }
                 if (id == -1)
+                {
+                    Debug.WriteLine("Attempted to write invalid packet type. " + type);
                     throw new InvalidOperationException("Attempted to write invalid packet type. " + type);
+                }
                 MinecraftStream.WriteVarInt((int)BufferedStream.PendingWrites + MinecraftStream.GetVarIntLength(id));
                 MinecraftStream.WriteVarInt(id);
                 BufferedStream.WriteImmediately = false;

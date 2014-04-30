@@ -30,9 +30,11 @@ namespace TestServer
             level.SaveTo("world");
             server = new MinecraftServer(level);
             server.ChatMessage += server_ChatMessage;
-            server.Settings.OnlineMode = true;
+            //server.Settings.OnlineMode = true;
+            server.Settings.OnlineMode = false;
             server.Settings.MotD = "Craft.Net Test Server";
-            server.Start(new IPEndPoint(IPAddress.Any, 25565));
+            server.Settings.MaxPlayers = 4;
+            server.Start(new IPEndPoint(IPAddress.Any, 25566));
             Console.WriteLine("Press 'q' to exit");
             ConsoleKeyInfo cki;
             do cki = Console.ReadKey(true);

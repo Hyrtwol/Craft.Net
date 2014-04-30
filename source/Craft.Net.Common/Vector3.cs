@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Runtime.InteropServices;
 
 namespace Craft.Net.Common
@@ -41,7 +42,7 @@ namespace Craft.Net.Common
         /// <returns></returns>
         public override string ToString()
         {
-            return string.Format("<{0},{1},{2}>", X, Y, Z);
+            return string.Format(CultureInfo.InvariantCulture, "<{0},{1},{2}>", X, Y, Z);
         }
 
         #region Math

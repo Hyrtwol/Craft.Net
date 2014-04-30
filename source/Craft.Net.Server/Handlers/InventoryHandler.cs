@@ -1,4 +1,5 @@
-﻿using Craft.Net.Common;
+﻿using System.Diagnostics;
+using Craft.Net.Common;
 using Craft.Net.Logic;
 using Craft.Net.Logic.Windows;
 using Craft.Net.Networking;
@@ -39,6 +40,7 @@ namespace Craft.Net.Server.Handlers
         public static void HeldItemChange(RemoteClient client, MinecraftServer server, IPacket _packet)
         {
             var packet = (HeldItemPacket)_packet;
+            Debug.WriteLine("HeldItemChange: {0}", packet.Slot);
             if (packet.Slot < 10 && packet.Slot >= 0)
             {
                 // TODO: Move the equipment update packet to an OnPropertyChanged event handler
@@ -58,6 +60,9 @@ namespace Craft.Net.Server.Handlers
             {
                 client.PlayerManager.SendInventoryUpdates = false;
                 var packet = (ClickWindowPacket)_packet;
+                Debug.WriteLine("ClickWindow: {0} {1} {2} {3} {4} {5}", 
+                    packet.WindowId, packet.SlotIndex, packet.MouseButton, 
+                    packet.TransactionId, packet.Mode, packet.ClickedItem);
                 Window window = null;
                 if (packet.WindowId == 0)
                     window = client.Entity.Inventory;
@@ -254,6 +259,8 @@ namespace Craft.Net.Server.Handlers
 
         public static void CloseWindow(RemoteClient client, MinecraftServer server, IPacket _packet)
         {
+            var packet = (CloseWindowPacket)_packet;
+            Debug.WriteLine("CloseWindow: {0}", packet.WindowId);
             // Do nothing
             // TODO: Do something?
         }

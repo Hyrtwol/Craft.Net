@@ -1,4 +1,5 @@
-﻿using Craft.Net.Common;
+﻿using System.Diagnostics;
+using Craft.Net.Common;
 using Craft.Net.Networking;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace Craft.Net.Server.Handlers
         public static void PlayerDigging(RemoteClient client, MinecraftServer server, IPacket _packet)
         {
             var packet = (PlayerBlockActionPacket)_packet;
+            Debug.WriteLine("PlayerDigging: {0} {1} {2} {3}", packet.Action, packet.X, packet.Y, packet.Z);
             var position = new Coordinates3D(packet.X, packet.Y, packet.Z);
             // TODO: Enforce line-of-sight
             var block = client.World.GetBlockInfo(position);
@@ -113,6 +115,9 @@ namespace Craft.Net.Server.Handlers
         public static void RightClick(RemoteClient client, MinecraftServer server, IPacket _packet)
         {
             var packet = (RightClickPacket)_packet;
+            Debug.WriteLine("RightClickPacket: {0} {1} {2} {3} {4}",
+                packet.X, packet.Y, packet.Z,
+                packet.Face, packet.HeldItem);
             var slot = client.Entity.Inventory[client.Entity.SelectedSlot];
             var position = new Coordinates3D(packet.X, packet.Y, packet.Z);
             var cursorPosition = new Coordinates3D(packet.CursorX, packet.CursorY, packet.CursorZ);

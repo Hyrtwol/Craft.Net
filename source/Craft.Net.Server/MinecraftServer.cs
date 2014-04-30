@@ -1,4 +1,5 @@
-﻿using Craft.Net.Anvil;
+﻿using System.Diagnostics;
+using Craft.Net.Anvil;
 using Craft.Net.Common;
 using Craft.Net.Networking;
 using Craft.Net.Server.Events;
@@ -427,6 +428,17 @@ namespace Craft.Net.Server
             if (!PacketHandlers.ContainsKey(packet.GetType()))
                 return;
                 //throw new InvalidOperationException("No packet handler registered for 0x" + packet.Id.ToString("X2"));
+            if ((packet is PlayerPacket) ||
+                (packet is PlayerPositionPacket) ||
+                (packet is PlayerLookPacket) ||
+                (packet is PlayerPositionAndLookPacket) ||
+                (packet is AnimationPacket))
+            {
+            }
+            else
+            {
+                Debug.WriteLine(packet);
+            }
             PacketHandlers[packet.GetType()](client, this, packet);
         }
 

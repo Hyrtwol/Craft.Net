@@ -39,7 +39,7 @@ namespace Craft.Net.Client
 
         internal byte[] SharedSecret { get; set; }
         internal bool IsLoggedIn { get; set; }
-        internal bool IsSpawned { get; set; }
+        public bool IsSpawned { get; set; }
 
         private Thread NetworkWorkerThread { get; set; }
         private Dictionary<Type, PacketHandler> PacketHandlers { get; set; }
@@ -71,10 +71,15 @@ namespace Craft.Net.Client
             SendPacket(handshake);
             var login = new LoginStartPacket(Session.SelectedProfile.Name);
             SendPacket(login);
+            //StartPhysicsWorker();
+        }
+
+        public void StartPhysicsWorker()
+        {
             PhysicsWorkerThread.Start();
         }
 
-        public void Disconnect(string reason)
+        public virtual void Disconnect(string reason)
         {
             NetworkWorkerThread.Abort();
             if (Client.Connected)

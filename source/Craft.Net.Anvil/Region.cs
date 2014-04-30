@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using fNbt;
@@ -100,11 +101,24 @@ namespace Craft.Net.Anvil
                         }
                     }
                     else if (World.WorldGenerator == null)
-                        throw new ArgumentException("The requested chunk is not loaded.", "position");
+                    {
+                        //throw new ArgumentException("The requested chunk is not loaded.", "position");
+                        Debug.WriteLine("The requested chunk is not loaded. " + position);
+                    }
                     else
+                    {
                         GenerateChunk(position);
+                    }
                 }
-                return Chunks[position];
+                try
+                {
+                    return Chunks[position];
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Unable to get chrunk for " + position + " with error: " + ex.Message);
+                    throw;
+                }
             }
         }
 

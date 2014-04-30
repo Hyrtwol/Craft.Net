@@ -1,4 +1,5 @@
-﻿using Craft.Net.Anvil;
+﻿using System.Diagnostics;
+using Craft.Net.Anvil;
 using Craft.Net.Common;
 using Craft.Net.Logic;
 using Craft.Net.Networking;
@@ -106,6 +107,8 @@ namespace Craft.Net.Server.Handlers
         public static void ClientStatus(RemoteClient client, MinecraftServer server, IPacket _packet)
         {
             var packet = (ClientStatusPacket)_packet;
+            Debug.WriteLine("ClientStatus: {0}",
+                    packet.Change);
             if (packet.Change == ClientStatusPacket.StatusChange.Respawn)
             {
                 var world = client.Entity.World;
