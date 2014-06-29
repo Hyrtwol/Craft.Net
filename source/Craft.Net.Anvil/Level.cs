@@ -320,8 +320,10 @@ namespace Craft.Net.Anvil
             var level = (Level)serializer.Deserialize(nbtFile.RootTag["Data"]);
             level.DatFile = file;
             level.BaseDirectory = Path.GetDirectoryName(file);
-            level.WorldGenerator = GetGenerator(level.GeneratorName);
-            level.WorldGenerator.Initialize(level);
+            var worldGenerator = GetGenerator(level.GeneratorName);
+            if (worldGenerator == null) throw new NullReferenceException(string.Format("Unable to create generator for '{0}'", level.GeneratorName));
+            worldGenerator.Initialize(level);
+            level.WorldGenerator = worldGenerator;
             var worlds = Directory.GetDirectories(level.BaseDirectory).Where(
                 d => Directory.GetFiles(d).Any(f => f.EndsWith(".mca") || f.EndsWith(".mcr")));
             foreach (var world in worlds)
@@ -338,11 +340,13 @@ namespace Craft.Net.Anvil
         /// </summary>
         public static IWorldGenerator GetGenerator(string generatorName)
         {
+            generatorName = generatorName.ToUpperInvariant();
             IWorldGenerator worldGenerator = null;
             Type generatorType;
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var assembly in assemblies)
             {
+                //if (assembly.FullName.StartsWith("Craft.")) Debug.Print("assembly={0}", assembly);
                 var types = assembly.GetTypes().Where(t =>
                     !t.IsAbstract && t.IsClass && typeof(IWorldGenerator).IsAssignableFrom(t) &&
                     t.GetConstructors().Any(c => c.IsPublic && !c.GetParameters().Any())).ToArray();

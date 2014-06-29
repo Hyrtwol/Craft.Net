@@ -49,7 +49,7 @@ namespace MineBot.Bot
             var session = new Session(name);
             
             var miner = new Miner(session, endPoint);
-            miner.ChatMessage += (s, e) => Log(e.RawMessage);
+            miner.ChatMessage += (s, e) => Log(e.Message.Text);
             miner.Disconnected += (s, e) => Log("Client disconnected " + e.Reason);
 
             Log("Adding miner " + miner);
